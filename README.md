@@ -1,11 +1,12 @@
 # hoist{m}
+Creators: Malcolm Kemp, Jordan Rector, Emily Stebbins
 ## Full-stack Application Project
 This is the backend API for the hoist{m} client: https://github.com/estebbins/hoistm-client
 
-## Overview
-This app allows users to upload files into a virtual file system. 
+## Overview (E)
+This app allows users to upload files into a virtual file system where the user can search and filter their files. Users can create custom labels as the singular & simple method for file organization. This is a full-stack MERN app using AWS S3 cloud storage and Multer middleware for file upload. This app features user authentication, encryption for file uploads, and file owners can control contributor access and rights.
 
-### Technologies Used:
+### Technologies Used (E):
 - Mongoose
 - MongoDb
 - Express
@@ -40,38 +41,31 @@ This app allows users to upload files into a virtual file system.
 - As a signed in user, I would like to search my files based on data above & custom filters
 - As a signed in user, I would like to download files from AWS
 
-### Stretch Goals
-- Calendar invites with files attached
-- Temporary file-sharing link (to preserve space)
-- File owners can add collaborators
-
-## Wireframes/Screenshots
+## Wireframes/Screenshots (J)
 
 #### Sign Up
-
 ![Sign_Up](images_readme/Sign_Up.png)
 
 #### Index
-
 ![Index](images_readme/Index.png)
 
 #### Label
-
 ![Label](images_readme/Label.png)
 
 #### Hoist Modal
-
 ![Hoist_modal](images_readme/Hoist_modal.png)
 
 #### Show Modal
-
 ![Show_modal](images_readme/Show_modal.png)
 
-## Entity Relationship Diagram
+## Component Diagram
+![Hoist_components_diagram](images_readme/hoistm_component_diagram.jpeg)
 
+## Entity Relationship Diagram (M)
 ![Hoist_erd](images_readme/hoistm_ERD.png)
 
-#### MODEL
+#### Route Tables (M)
+##### Files
 | **URL**              | **HTTP Verb** |**Actions**|
 |----------------------|---------------|-----------|
 | /files/mine         | GET           | index
@@ -82,20 +76,13 @@ This app allows users to upload files into a virtual file system.
 | /files/:id          | PATCH/PUT     | update      |
 | /files/:id          | DELETE        | destroy     |
 
-
-
-
-
-#### Authentication: Users
+##### Authentication: Users
 
 | **URL**              | **HTTP Verb** |**Actions**|**Controller#Action**|
 |----------------------|---------------|-----------|---------------------|
 | /auth/signup         | POST          | new       | users#signup
 | /auth/login          | POST          | create    | users#login
 | /auth/logout         | DELETE        | destroy   | users#logout        |
-
-## Approach taken
-- Our team wanted to learn more about AWS and decided to take on a file storage application as our MERN project.
 
 ### Models
 #### File Model [^9]
@@ -137,6 +124,7 @@ const mongoose = require('mongoose')
 const contributorSchema = new mongoose.Schema({
   userRef: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   }, 
   permissionLevel: {
@@ -210,6 +198,17 @@ router.post('/files', upload.single('file'), (req, res, next) => {
 module.exports = router
 ```
 Example client code [^11]
+
+
+### Stretch Goals
+- Calendar invites with files attached
+- PDF Conversion (API)
+- Temporary file-sharing link (to preserve space)
+- Collaborators can access files with appropriate permission level
+
+## Approach taken
+- Our team wanted to learn more about AWS and decided to take on a file storage application as our MERN project.
+
 ## Installation instructions
 **Using the application**
 
@@ -249,41 +248,48 @@ Project planning guide. [^1]
 
 ### Project Planning
 #### Sprint 1 (Est completion 2/13/23):
-- [ ] Develop project pitch (2/10/23-2/13/23)
-- [ ] Determine team roles & resposibilities
+- [x] Develop project pitch (2/10/23-2/13/23)
+- [x] Determine team roles & resposibilities
 - [x] Test team git workflows [^8]
-- [ ] Create README.md file with project plannings steps
+- [x] Create README.md file with project plannings steps
 - [ ] Gain project approval (2/13/23)
 
-**Sprint 2 (Est completion 2/13/23):**
-- [ ] Review react-auth-boilerplate documentation [^5]
-- [ ] Review mongoose-express-auth-API-boilerplate documentation [^4]
-- [ ] Follow boilerplate installation instructions
-- [ ] Install other dependencies as needed
-- [ ] Research AWS-S3 set-up guide [^3]
-- [ ] Research multer middleware package [^10]
-- [ ] Ensure API functioning properly from template
-- [ ] Begin model 1 build 
+#### Sprint 2 (Est completion 2/13/23):
+##### Backend - M
+- [ ] Review mongoose-express-auth-API-boilerplate documentation - M [^4]
+- [ ] Follow boilerplate installation instructions - J/M/E
+- [ ] Install other dependencies as needed - All
+- [x] Research AWS-S3 set-up guide - M [^3]
+- [ ] Research multer middleware package - E [^10]
+- [ ] Create models & subdocuments 
 - [ ] Seed database and/or incoporate API
-- [ ] Create Index & Show Routes & test in Postman
+- [ ] Build Create, Index & Show Routes & test in Postman
+##### Frontend - J
+- [ ] Review react-auth-boilerplate documentation - J [^5]
+- [ ] Follow boilerplate installation instructions - J/M/E
+- [ ] Install other dependencies as needed - All
 
-**Sprint 3 (Est completion 2/14/23):**
-- [ ] Adjust seed route to script if necessary
-- [ ] Create user model (in boilerplate)
-- [ ] Complete model 1 5 RESTful routes & test in Postman 
-- [ ] Create model 2/subdocument
-- [ ] Create user & model 2 routes, and test in Postman
+#### Sprint 3 (Est completion 2/14/23):
+##### Backend - M
+- [ ] Complete file RESTful routes & test in Postman 
 - [ ] Confirm back-end development working without unnecessary bugs
+##### Frontend - J
+- [ ] FileIndex component
+- [ ] ShowFile component
+- [ ] CreateFile component
+- [ ] EditFile component
 
-**Sprint 4 (Est completion 2/15/23):**
-- [ ] Complete liquid views
-- [ ] Enhance styling of pages, get feedback
-- [ ] Update responses & error handling for liquid views
-- [ ] Conduct extensive views testing & ensure DB connection intact
+#### Sprint 4 (Est completion 2/15/23):
+##### Frontend - J
+- [ ] Build label component
+- [ ] Filters component
+- [ ] Enhance styling of pages, get feedback 
+- [ ] Update responses & error handling
+- [ ] Conduct extensive testing & ensure DB connection intact
 - [ ] Evaluate readiness for deployment
 - [ ] Merge development branch(s) as needed with main
 
-**Sprint 5 (Est completion 2/16/23):**
+##### Sprint 5 (Est completion 2/16/23):
 - [ ] Deploy application
 - [ ] Conduct extensive testing
 - [ ] Conduct user acceptance testing
@@ -292,7 +298,7 @@ Project planning guide. [^1]
 - [ ] Confirm all technical requirements & MVP completion
 - [ ] Submit project 2 per submission instructions
 
-**Final Deliverable (Est completion 2/21/23):**
+#### Final Deliverable (Est completion 2/21/23):
 - [ ] Present deliverable to SEI Cohort & Instructors
 - [ ] Update documentation to incorporate feedback and development opportunities
 
@@ -305,7 +311,7 @@ Project planning guide. [^1]
 [^4]: https://git.generalassemb.ly/sei-ec-remote/mongoose-express-auth-API-boilerplate
 [^5]: https://git.generalassemb.ly/sei-ec-remote/react-auth-boilerplate
 [^6]: Used Figma to create wireframes
-[^7]: used Lucid Chart to develop the final ERD. Figma for original (in assets folder)
+[^7]: used Lucid Chart to develop component diagram, ERD
 [^8]: https://git.generalassemb.ly/sei-ec-remote/git-team-workflow
 [^9]: https://git.generalassemb.ly/sei-ec-remote/c2c-image-upload-api/tree/training
 [^10]: https://expressjs.com/en/resources/middleware/multer.html
