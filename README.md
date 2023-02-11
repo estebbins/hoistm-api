@@ -87,7 +87,6 @@ This app allows users to upload files into a virtual file system.
 const mongoose = require('mongoose')
 const contributorSchema = require('./contributor')
 
-
 const fileSchema = new mongoose.Schema({
     url: {
         type: String,
@@ -99,6 +98,9 @@ const fileSchema = new mongoose.Schema({
 	},
     labels: {
         type: Array,
+    },
+    description: {
+        type: String
     },
     contributors: [contributorSchema]
 }, {
@@ -191,7 +193,7 @@ router.post('/files', upload.single('file'), (req, res, next) => {
 
 module.exports = router
 ```
-
+Example client code [^11]
 ## Installation instructions
 **Using the application**
 
@@ -291,6 +293,7 @@ Project planning guide. [^1]
 [^8]: https://git.generalassemb.ly/sei-ec-remote/git-team-workflow
 [^9]: https://git.generalassemb.ly/sei-ec-remote/c2c-image-upload-api/tree/training
 [^10]: https://expressjs.com/en/resources/middleware/multer.html
+[^11]: client example code: https://git.generalassemb.ly/sei-ec-remote/c2c-image-upload-client/tree/c2c-training 
 
 Color pallette guide: https://icolorpalette.com/download/palette/446754_color_palette.jpg 
 
