@@ -44,6 +44,10 @@ This app allows users to upload files into a virtual file system.
 
 ## Wireframes/Screenshots
 
+#### Home
+
+![Home](images_readme/Sign_Up.png)
+
 ## Entity Relationship Diagrams
 
 #### MODEL
@@ -168,7 +172,6 @@ Project planning guide. [^1]
 [^5]: https://git.generalassemb.ly/sei-ec-remote/react-auth-boilerplate
 [^6]: Used Figma to create wireframes
 [^7]: used Lucid Chart to develop the final ERD. Figma for original (in assets folder)
-    
 
 Color pallette guide: https://icolorpalette.com/download/palette/446754_color_palette.jpg 
 
