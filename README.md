@@ -47,11 +47,27 @@ This app allows users to upload files into a virtual file system.
 
 ## Wireframes/Screenshots
 
-#### Home
+#### Sign Up
 
-![Home](images_readme/Sign_Up.png)
+![Sign_Up](images_readme/Sign_Up.png)
 
-## Entity Relationship Diagrams
+#### Index
+
+![Index](images_readme/Index.png)
+
+#### Label
+
+![Label](images_readme/Label.png)
+
+#### Hoist Modal
+
+![Hoist_modal](images_readme/Hoist_modal.png)
+
+#### Show Modal
+
+![Show_modal](images_readme/Show_modal.png)
+
+## Entity Relationship Diagram
 
 #### MODEL
 | **URL**              | **HTTP Verb** |**Actions**|
