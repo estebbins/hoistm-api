@@ -16,6 +16,9 @@ This app allows users to upload files into a virtual file system.
 - AWS S3
 - Axios
 - JavaScript
+- Multer - "node.js middleware for handling multi-part/form-data, which is primarily used for uploading files" [^10]
+    - Adds a body object and file(s) object to request body
+    - **Must use** enctype="multipart/form-data" in forms
 - packages: Node, Nodemon, dotenv, method-override, express-session, connect-mongo
 
 ## User stories
@@ -78,6 +81,117 @@ This app allows users to upload files into a virtual file system.
 ## Approach taken
 - Our team wanted to learn more about AWS and SQL databases and decided to take on a file storage application as our MERN project.
 
+### Models
+#### File Model [^9]
+```javascript
+const mongoose = require('mongoose')
+const contributorSchema = require('./contributor')
+
+
+const fileSchema = new mongoose.Schema({
+    url: {
+        type: String,
+        required: true
+    }, 
+    owner: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
+	},
+    labels: {
+        type: Array,
+    },
+    contributors: [contributorSchema]
+}, {
+  timestamps: true
+})
+
+module.exports = mongoose.model('File', fileSchema)
+```
+- [ ] Add owner to fileSchema?
+- [ ] Add labels to fileSchema
+```javascript
+
+```
+#### Contributors subdocument
+```javascript
+const mongoose = require('mongoose')
+
+const contributorSchema = new mongoose.Schema({
+  userRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  }, 
+  permissionLevel: {
+    type: String,
+    enum: ['read only', 'read and write']
+    default: ['read only']
+  }
+}, {
+  timestamps: true
+})
+
+module.exports = contributorSchema
+```
+
+#### User Model [^9]
+```javascript
+const mongoose = require('mongoose')
+
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  hashedPassword: {
+    type: String,
+    required: true
+  },
+  token: String
+}, {
+  timestamps: true,
+  toObject: {
+    // remove `hashedPassword` field when we call `.toObject`
+    transform: (_doc, user) => {
+      delete user.hashedPassword
+      return user
+    }
+  }
+})
+
+module.exports = mongoose.model('User', userSchema)
+```
+#### File route (example) [^9]
+```javascript
+const express = require('express')
+const multer = require('multer')
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
+// const customErrors = require('../../lib/custom_errors')
+// const handle404 = customErrors.handle404
+// const removeBlanks = require('../../lib/remove_blank_fields')
+const File = require('../models/file')
+const router = express.Router()
+const s3Upload = require('../../lib/s3_upload')
+
+router.post('/files', upload.single('file'), (req, res, next) => {
+  console.log(req.body.file, req.file)
+  s3Upload(req.file)
+    .then(s3File => {
+      return File.create({
+        url: s3File.Location
+      })
+    })
+    .then(file => {
+      console.log(file)
+      res.status(201).json({ file })
+    })
+    .catch(next)
+})
+
+module.exports = router
+```
+
 ## Installation instructions
 **Using the application**
 
@@ -118,6 +232,8 @@ Project planning guide. [^1]
 ### Project Planning
 #### Sprint 1 (Est completion 2/13/23):
 - [ ] Develop project pitch (2/10/23-2/13/23)
+- [ ] Determine team roles & resposibilities
+- [x] Test team git workflows [^8]
 - [ ] Create README.md file with project plannings steps
 - [ ] Gain project approval (2/13/23)
 
@@ -127,19 +243,19 @@ Project planning guide. [^1]
 - [ ] Follow boilerplate installation instructions
 - [ ] Install other dependencies as needed
 - [ ] Research AWS-S3 set-up guide [^3]
+- [ ] Research multer middleware package [^10]
 - [ ] Ensure API functioning properly from template
 - [ ] Begin model 1 build 
 - [ ] Seed database and/or incoporate API
 - [ ] Create Index & Show Routes & test in Postman
 
 **Sprint 3 (Est completion 2/14/23):**
-- [ ] Adjust seed route to script if necessary (N/A)
+- [ ] Adjust seed route to script if necessary
 - [ ] Create user model (in boilerplate)
 - [ ] Complete model 1 5 RESTful routes & test in Postman 
 - [ ] Create model 2/subdocument
 - [ ] Create user & model 2 routes, and test in Postman
 - [ ] Confirm back-end development working without unnecessary bugs
-- [ ] Set up for liquid-views
 
 **Sprint 4 (Est completion 2/15/23):**
 - [ ] Complete liquid views
@@ -172,6 +288,9 @@ Project planning guide. [^1]
 [^5]: https://git.generalassemb.ly/sei-ec-remote/react-auth-boilerplate
 [^6]: Used Figma to create wireframes
 [^7]: used Lucid Chart to develop the final ERD. Figma for original (in assets folder)
+[^8]: https://git.generalassemb.ly/sei-ec-remote/git-team-workflow
+[^9]: https://git.generalassemb.ly/sei-ec-remote/c2c-image-upload-api/tree/training
+[^10]: https://expressjs.com/en/resources/middleware/multer.html
 
 Color pallette guide: https://icolorpalette.com/download/palette/446754_color_palette.jpg 
 
