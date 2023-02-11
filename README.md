@@ -69,22 +69,22 @@ This app allows users to upload files into a virtual file system.
 
 ## Entity Relationship Diagram
 
+![Hoist_erd](images_readme/hoistm_ERD.png)
+
 #### MODEL
 | **URL**              | **HTTP Verb** |**Actions**|
 |----------------------|---------------|-----------|
-| /games/store          | GET           | index
-| /games/:storeId/new   | GET           | new (with Steam info)
-| /games/newForm/      | GET           | new
-| /games/    | POST           | new (send to savedGames)
-| /games/newForm/getInfo   | POST       | create     | 
-| /games/:id          | GET           | show         |
+| /files/mine         | GET           | index
+| /files/:id          | GET           | show
+| /files/new          | GET           | new
+| /files/new          | POST          | create
+| /files/:id/edit     | GET           | edit        |
+| /files/:id          | PATCH/PUT     | update      |
+| /files/:id          | DELETE        | destroy     |
 
-#### comments
 
-| **URL**              | **HTTP Verb** |**Actions**|
-|----------------------------------------|---------------|-----------|
-| /comments/:gameId                     | POST          | create
-| /comments/delete/:gameID/:commentId   | DELETE        | destroy   |
+
+
 
 #### Authentication: Users
 
@@ -95,7 +95,7 @@ This app allows users to upload files into a virtual file system.
 | /auth/logout         | DELETE        | destroy   | users#logout        |
 
 ## Approach taken
-- Our team wanted to learn more about AWS and SQL databases and decided to take on a file storage application as our MERN project.
+- Our team wanted to learn more about AWS and decided to take on a file storage application as our MERN project.
 
 ### Models
 #### File Model [^9]
