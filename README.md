@@ -3,10 +3,10 @@ Creators: Malcolm Kemp, Jordan Rector, Emily Stebbins
 ## Full-stack Application Project
 This is the backend API for the hoist{m} client: https://github.com/estebbins/hoistm-client
 
-## Overview (E)
+## Overview
 This app allows users to upload files into a virtual file system where the user can search and filter their files. Users can create custom labels as the singular & simple method for file organization. This is a full-stack MERN app using AWS S3 cloud storage and Multer middleware for file upload. This app features user authentication, encryption for file uploads, and file owners can control contributor access and rights.
 
-### Technologies Used (E):
+### Technologies Used:
 - Mongoose
 - MongoDb
 - Express
@@ -41,30 +41,12 @@ This app allows users to upload files into a virtual file system where the user 
 - As a signed in user, I would like to search my files based on data above & custom filters
 - As a signed in user, I would like to download files from AWS
 
-## Wireframes/Screenshots (J)
+## Wireframes/Screenshots
 
-#### Sign Up
-![Sign_Up](images_readme/Sign_Up.png)
-
-#### Index
-![Index](images_readme/Index.png)
-
-#### Label
-![Label](images_readme/Label.png)
-
-#### Hoist Modal
-![Hoist_modal](images_readme/Hoist_modal.png)
-
-#### Show Modal
-![Show_modal](images_readme/Show_modal.png)
-
-## Component Diagram
-![Hoist_components_diagram](images_readme/hoistm_component_diagram.jpeg)
-
-## Entity Relationship Diagram (M)
+## Entity Relationship Diagram
 ![Hoist_erd](images_readme/hoistm_ERD.png)
 
-#### Route Tables (M)
+#### Route Tables
 ##### Files
 | **URL**              | **HTTP Verb** |**Actions**|
 |----------------------|---------------|-----------|
@@ -84,6 +66,18 @@ This app allows users to upload files into a virtual file system where the user 
 | /auth/login          | POST          | create    | users#login
 | /auth/logout         | DELETE        | destroy   | users#logout        |
 
+#### Route Tables
+##### Files
+| **URL**              | **HTTP Verb** |**Actions**|
+|----------------------|---------------|-----------|
+| /files/mine         | GET           | index
+| /files/:id          | GET           | show
+| /files/new          | GET           | new
+| /files/new          | POST          | create
+| /files/:id/edit     | GET           | edit        |
+| /files/:id          | PATCH/PUT     | update      |
+| /files/:id          | DELETE        | destroy     |
+
 ### Models
 #### File Model [^9]
 ```javascript
@@ -100,7 +94,7 @@ const fileSchema = new mongoose.Schema({
 		ref: 'User'
 	},
     labels: {
-        type: Array,
+        type: [String],
     },
     description: {
         type: String
@@ -112,8 +106,6 @@ const fileSchema = new mongoose.Schema({
 
 module.exports = mongoose.model('File', fileSchema)
 ```
-- [ ] Add owner to fileSchema?
-- [ ] Add labels to fileSchema
 ```javascript
 
 ```
@@ -199,43 +191,28 @@ module.exports = router
 ```
 Example client code [^11]
 
-
-### Stretch Goals
-- Calendar invites with files attached
-- PDF Conversion (API)
-- Temporary file-sharing link (to preserve space)
-- Collaborators can access files with appropriate permission level
-
-## Approach taken
-- Our team wanted to learn more about AWS and decided to take on a file storage application as our MERN project.
-
-## Installation instructions
-**Using the application**
-
-## Unsolved problems
-
 ## Project Requirements
 Project 3 overview. [^2]
 Project planning guide. [^1]
 ### MVP
-- [ ]A working app, built by the whole team, hosted somewhere on the internet
+- [ ] A working app, built by the whole team, hosted somewhere on the internet
     - Git Manager: Emily Stebbins - https://github.com/estebbins 
     - Frontend Manager: Jordan Rector - https://github.com/rectorjordan94 
     - Backend Manager: Malcolm Kemp - https://github.com/Malokingsley 
-- [ ]A link to your hosted working app in the URL section in each of your Github repos
+- [ ] A link to your hosted working app in the URL section in each of your Github repos
 - [ ]TWO Github repos:
     - one for the API - https://github.com/estebbins/hoistm-api
     - one for the client - https://github.com/estebbins/hoistm-client
     - A team git repository hosted on Github, with a link to your hosted project, and frequent commits from every team member dating back to the very beginning of the project.
-- [ ]A readme.md file with:
-    - []Include a screenshot of the site in repo's README
-    - []Explanations of the technologies used
-    - []A couple paragraphs about the general approach you took
-    - []Installation instructions for any dependencies
-    - []Your user stories – who are your users, what do they want, and why?
-    - []Your wireframes – sketches of major views / interfaces in your application - EMBEDDED IN YOUR README
-    - []Your ERDS - Entity Relationship Diagrams - EMBEDDED IN YOUR README
-    - []Descriptions of any unsolved problems or major hurdles your team had to overcome
+- [ ] A readme.md file with:
+    - [ ]Include a screenshot of the site in repo's README
+    - [ ]Explanations of the technologies used
+    - [ ]A couple paragraphs about the general approach you took
+    - [ ]Installation instructions for any dependencies
+    - [ ]Your user stories – who are your users, what do they want, and why?
+    - [ ]Your wireframes – sketches of major views / interfaces in your application - EMBEDDED IN YOUR README
+    - [ ]Your ERDS - Entity Relationship Diagrams - EMBEDDED IN YOUR README
+    - [ ]Descriptions of any unsolved problems or major hurdles your team had to overcome
 
 #### Technical Requirements
 - Build a full-stack application by making your own back-end API and your own front-end client
@@ -252,7 +229,7 @@ Project planning guide. [^1]
 - [x] Determine team roles & resposibilities
 - [x] Test team git workflows [^8]
 - [x] Create README.md file with project plannings steps
-- [ ] Gain project approval (2/13/23)
+- [x] Gain project approval (2/13/23)
 
 #### Sprint 2 (Est completion 2/13/23):
 ##### Backend - M
@@ -301,8 +278,6 @@ Project planning guide. [^1]
 #### Final Deliverable (Est completion 2/21/23):
 - [ ] Present deliverable to SEI Cohort & Instructors
 - [ ] Update documentation to incorporate feedback and development opportunities
-
-**Media sources**
 
 
 [^1]: https://git.generalassemb.ly/sei-ec-remote/planning-projects
