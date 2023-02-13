@@ -14,8 +14,14 @@ const labelSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:'File'
     }],
-    name: {type: String, required: true},
-    color: {type: String, required: true},
+    name: {
+        type: String, 
+        required: true
+    },
+    color: {
+        type: String, 
+        required: true
+    },
 },
 {
   timestamps: true
