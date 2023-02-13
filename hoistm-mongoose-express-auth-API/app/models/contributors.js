@@ -8,7 +8,7 @@ const contributorSchema = new mongoose.Schema({
   }, 
   permissionLevel: {
     type: String,
-    enum: ['read only', 'read and write']
+    enum: ['read only', 'read and write'],
     default: ['read only']
   }
 }, {
