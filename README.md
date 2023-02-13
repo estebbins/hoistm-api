@@ -318,4 +318,3 @@ Project planning guide. [^1]
 [^11]: client example code: https://git.generalassemb.ly/sei-ec-remote/c2c-image-upload-client/tree/c2c-training 
 
 Color pallette guide: https://icolorpalette.com/download/palette/446754_color_palette.jpg 
-
