@@ -9,7 +9,8 @@ const contributorSchema = new mongoose.Schema({
   permissionLevel: {
     type: String,
     enum: ['read only', 'read and write'],
-    default: ['read only']
+    default: 'read only',
+    required: true
   }
 }, {
   timestamps: true

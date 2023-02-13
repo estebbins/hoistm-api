@@ -36,6 +36,7 @@ const router = express.Router()
 // GET /files
 router.get('/files', requireToken, (req, res, next) => {
 	File.find()
+		.populate('contributors.userRef')
 		.then((files) => {
 			// `files` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
