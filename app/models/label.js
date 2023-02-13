@@ -5,7 +5,6 @@ const File = require('./file')
 
 const labelSchema = new mongoose.Schema({
 
-
     owner: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'

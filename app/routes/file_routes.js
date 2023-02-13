@@ -3,15 +3,13 @@ const express = require('express')
 // Passport docs: http://www.passportjs.org/docs/
 const passport = require('passport')
 
-const multer = require(multer)
+const multer = require('multer')
 const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
-const File = require('../models/files')
-const router = express.Router()
-const s3Upload = require('../../lib/s3_upload')
+// const upload = multer({ storage: storage })
+// const s3Upload = require('../../lib/s3_upload')
 
 // pull in Mongoose model for files
-const File = require('../models/files')
+const File = require('../models/file')
 
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
@@ -38,6 +36,7 @@ const router = express.Router()
 // GET /files
 router.get('/files', requireToken, (req, res, next) => {
 	File.find()
+		.populate('contributors.userRef')
 		.then((files) => {
 			// `files` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
