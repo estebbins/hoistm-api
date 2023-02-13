@@ -18,7 +18,7 @@ const fileSchema = new mongoose.Schema({
     },
     contributors: [contributorSchema]
 }, {
-  timestamps: true
+    timestamps: true
 })
 
 module.exports = mongoose.model('File', fileSchema)
