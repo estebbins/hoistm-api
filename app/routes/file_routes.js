@@ -4,10 +4,30 @@ const express = require('express')
 const passport = require('passport')
 
 const multer = require('multer')
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const multerS3 = require('multer-s3')
+// const storage = multer.memoryStorage()
+// const aws = require('aws-sdk')
+const aws = require('@aws-sdk/client-s3')
+// const upload = multer({ storage: storage })
+// aws.config.update({ accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, region: process.env.AWS_REGION, })
+
+const s3 = new aws.S3Client({ 
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, 
+    region: process.env.AWS_REGION
+})
+const upload = multer({
+    storage: multerS3({
+        s3: s3,
+		acl: 'public-read',
+        bucket: 'hoistm-cloud-system',
+        key: function (req, file, cb) {
+            console.log('file', file)
+            cb(null, file.originalname); //use Date.now() for unique file keys
+        }
+    })
+})
 const s3Upload = require('../../lib/s3_upload')
-const aws = require('aws-sdk')
 
 // pull in Mongoose model for files
 const File = require('../models/file')
@@ -34,7 +54,7 @@ const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
 // AWS Configuration
-aws.config.update({ accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, region: process.env.AWS_REGION, })
+
 
 // INDEX
 // GET /files
@@ -88,23 +108,45 @@ router.get('/files/:id', requireToken, (req, res, next) => {
 // 		.catch(next)
 // })
 
-router.post('/files', upload.single('file'), async (req, res) => { 
-    try { 
-        console.log('params', req.params)
-        console.log('req.body', req.body)
-        console.log('req.body.file', req.body.file)
-        console.log('req.file', req.file)
-        console.log('req.file.path', req.file.path)
-        const fileUrl = await s3Upload(req.file.path, req.file.originalname) 
-        res.json({ url: fileUrl }) 
-    } 
-    catch (err) { 
-        console.log('req.body.file', req.body.file)
-        console.log('req.file', req.file)
-        console.error(err) 
-        res.status(500).json({ error: 'Failed to upload file' }) 
-    } 
+// router.post('/files', upload.single('file'), async (req, res) => { 
+//     try { 
+//         console.log('params', req.params)
+//         console.log('req.body', req.body)
+//         console.log('req.body.file', req.body.file)
+//         console.log('req.file', req.file)
+//         console.log('req.file.path', req.file.path)
+//         const fileUrl = await s3Upload(req.file.path, req.file.originalname) 
+//         res.json({ url: fileUrl }) 
+//     } 
+//     catch (err) { 
+//         console.log('req.body.file', req.body.file)
+//         console.log('req.file', req.file)
+//         console.error(err) 
+//         res.status(500).json({ error: 'Failed to upload file' }) 
+//     } 
+// })'
+
+router.post('/files', upload.single('file'), (req, res, next) => {
+    let body
+    // res.send({
+	// 		message: "Uploaded!",
+	// 		url: function(file) {
+    //             body = {url: file.location, name: file.key, type: file.mimetype, size: file.size}
+	// 			return body
+	// 		}
+	// 	})
+    console.log('body', req.body)
+    console.log('file', req.file)
+    req.body.url = req.file.location
+    console.log('body', req.body)
+    req.body.owner = req.userId
+    File.create(req.body)
+        .then(file => {
+            res.status(201).json({ file: file.toObject() })
+        })
+        .catch(next)
 })
+
 
 // UPDATE
 // PATCH /files/5a7db6c74d55bc51bdf39793
