@@ -5,8 +5,9 @@ const passport = require('passport')
 
 const multer = require('multer')
 const storage = multer.memoryStorage()
-// const upload = multer({ storage: storage })
-// const s3Upload = require('../../lib/s3_upload')
+const upload = multer({ storage: storage })
+const s3Upload = require('../../lib/s3_upload')
+const aws = require('aws-sdk')
 
 // pull in Mongoose model for files
 const File = require('../models/file')
@@ -31,6 +32,9 @@ const requireToken = passport.authenticate('bearer', { session: false })
 
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
+
+// AWS Configuration
+aws.config.update({ accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, region: process.env.AWS_REGION, })
 
 // INDEX
 // GET /files
@@ -63,19 +67,43 @@ router.get('/files/:id', requireToken, (req, res, next) => {
 
 // CREATE
 // POST /files
-router.post('/files', requireToken, (req, res, next) => {
-	// set owner of new file to be current user
-	req.body.file.owner = req.user.id
+// router.post('/files', requireToken, upload.single('file'), async (req, res, next) => {
+// 	// set owner of new file to be current user
+// 	req.body.file.owner = req.user.id
+//     console.log('req.body.file', req.body.file)
+//     console.log('req.file', req.file)
+//     await s3Upload(req.file)
+//         .then(s3File => {
+//             return File.create({
+//             url: s3File.Location
+//             })
+//         })
+// 		// respond to succesful `create` with status 201 and JSON of new "file"
+// 		.then(file => {
+// 			res.status(201).json({ file: file.toObject() })
+// 		})
+// 		// if an error occurs, pass it off to our error handler
+// 		// the error handler needs the error message and the `res` object so that it
+// 		// can send an error message back to the client
+// 		.catch(next)
+// })
 
-	File.create(req.body.file)
-		// respond to succesful `create` with status 201 and JSON of new "file"
-		.then((file) => {
-			res.status(201).json({ file: file.toObject() })
-		})
-		// if an error occurs, pass it off to our error handler
-		// the error handler needs the error message and the `res` object so that it
-		// can send an error message back to the client
-		.catch(next)
+router.post('/files', upload.single('file'), async (req, res) => { 
+    try { 
+        console.log('params', req.params)
+        console.log('req.body', req.body)
+        console.log('req.body.file', req.body.file)
+        console.log('req.file', req.file)
+        console.log('req.file.path', req.file.path)
+        const fileUrl = await s3Upload(req.file.path, req.file.originalname) 
+        res.json({ url: fileUrl }) 
+    } 
+    catch (err) { 
+        console.log('req.body.file', req.body.file)
+        console.log('req.file', req.file)
+        console.error(err) 
+        res.status(500).json({ error: 'Failed to upload file' }) 
+    } 
 })
 
 // UPDATE
