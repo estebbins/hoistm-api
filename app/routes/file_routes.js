@@ -79,6 +79,8 @@ router.get('/files', requireToken, (req, res, next) => {
 router.get('/files/:id', requireToken, (req, res, next) => {
 	// req.params.id will be set based on the `:id` in the route
 	File.findById(req.params.id)
+        .populate('contributors.userRef')
+        .populate('owner')
 		.then(handle404)
 		// if `findById` is succesful, respond with 200 and "file" JSON
 		.then((file) => res.status(200).json({ file: file.toObject() }))
@@ -128,23 +130,18 @@ router.get('/files/:id', requireToken, (req, res, next) => {
 // })'
 
 router.post('/files', upload.single('file'), requireToken, (req, res, next) => {
-    // res.send({
-	// 		message: "Uploaded!",
-	// 		url: function(file) {
-    //             body = {url: file.location, name: file.key, type: file.mimetype, size: file.size}
-	// 			return body
-	// 		}
-	// 	})
-    console.log('body', req.body)
-    console.log('file', req.file)
+    // upload.single() uploads the file to AWS and returns a file object (req.file)
+    // console.log('body', req.body)
+    // console.log('file', req.file)
     req.body.url = req.file.location
-    console.log('body', req.body)
+    // console.log('body', req.body)
     req.body.owner = req.user._id
     // name field could be key or original name from req.file
     req.body.name = req.file.originalname
+    // File type
     req.body.type = req.file.mimetype
-    console.log('body', req.body)
-    console.log('userId', req.user._id)
+    // console.log('body', req.body)
+    // console.log('userId', req.user._id)
     
     File.create(req.body)
         .then(file => {
