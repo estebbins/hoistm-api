@@ -56,7 +56,6 @@ const router = express.Router()
 
 // AWS Configuration
 
-
 // INDEX
 // GET /files
 router.get('/files', requireToken, (req, res, next) => {
