@@ -21,6 +21,9 @@ const fileSchema = new mongoose.Schema({
     description: {
         type: String
     },
+    awsKey: {
+        type: String,
+    },
     contributors: [contributorSchema]
 }, {
     timestamps: true
