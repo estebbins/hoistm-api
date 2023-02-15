@@ -61,6 +61,7 @@ const router = express.Router()
 router.get('/files', requireToken, (req, res, next) => {
 	File.find()
 		.populate('contributors.userRef')
+        .populate('owner')
 		.then((files) => {
 			// `files` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
@@ -126,8 +127,7 @@ router.get('/files/:id', requireToken, (req, res, next) => {
 //     } 
 // })'
 
-router.post('/files', upload.single('file'), (req, res, next) => {
-    let body
+router.post('/files', upload.single('file'), requireToken, (req, res, next) => {
     // res.send({
 	// 		message: "Uploaded!",
 	// 		url: function(file) {
@@ -139,7 +139,13 @@ router.post('/files', upload.single('file'), (req, res, next) => {
     console.log('file', req.file)
     req.body.url = req.file.location
     console.log('body', req.body)
-    req.body.owner = req.userId
+    req.body.owner = req.user._id
+    // name field could be key or original name from req.file
+    req.body.name = req.file.originalname
+    req.body.type = req.file.mimetype
+    console.log('body', req.body)
+    console.log('userId', req.user._id)
+    
     File.create(req.body)
         .then(file => {
             res.status(201).json({ file: file.toObject() })
