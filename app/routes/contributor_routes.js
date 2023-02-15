@@ -37,6 +37,7 @@ const router = express.Router()
 // GET -> index of users with a particular e-mail address
 router.get('/contributors/:filter', requireToken, (req, res, next) => {
     const filter = req.params.filter
+    // Resource for setting up the partial search parameters: https://kb.objectrocket.com/mongo-db/mongoose-partial-text-search-606
     User.find({ email: { $regex: filter, $options:'i' }})
         .then(users=> {
             console.log(users)
@@ -49,9 +50,9 @@ router.get('/contributors/:filter', requireToken, (req, res, next) => {
 // POST -> create a contributor(and give that contributor to a file)
 // POST /contributors/:fileId
 router.post('/contributors/:fileId', requireToken, removeBlanks, (req, res, next) => {
-
+    console.log('cont post req body', req.body)
     const contributor = req.body.contributor
-
+    console.log('cont post req body', req.body.contributor)
     const fileId = req.params.fileId
     File.findById(fileId)
         // first step is to use our custom 404 middleware
