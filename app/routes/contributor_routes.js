@@ -10,6 +10,7 @@ const storage = multer.memoryStorage()
 
 // pull in Mongoose model for files
 const File = require('../models/file')
+const User = require('../models/user')
 
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
@@ -24,6 +25,7 @@ const requireOwnership = customErrors.requireOwnership
 // this is middleware that will remove blank fields from `req.body`, e.g.
 // { contributors: { title: '', text: 'foo' } } -> { contributors: { text: 'foo' } }
 const removeBlanks = require('../../lib/remove_blank_fields')
+const user = require('../models/user')
 // passing this as a second argument to `router.<verb>` will make it
 // so that a token MUST be passed for that route to be available
 // it will also set `req.user`
@@ -31,6 +33,18 @@ const requireToken = passport.authenticate('bearer', { session: false })
 
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
+
+// GET -> index of users with a particular e-mail address
+router.get('/contributors/:filter', requireToken, (req, res, next) => {
+    const filter = req.params.filter
+    User.find({ email: { $regex: filter, $options:'i' }})
+        .then(users=> {
+            console.log(users)
+            return users.map(user => user.toObject())
+        })
+        .then((users) => res.status(200).json({ users: users }))
+        .catch(next)
+})
 
 // POST -> create a contributor(and give that contributor to a file)
 // POST /contributors/:fileId

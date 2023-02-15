@@ -182,6 +182,7 @@ router.delete('/files/:id', requireToken, async (req, res, next) => {
 		.then(async file => {
             console.log(file.awsKey)
             console.log(process.env.AWS_S3_BUCKET_NAME)
+            // details on the latest delete method through AWS: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
             await s3.send(new DeleteObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}, (err, data) => {
                 console.error(err)
                 console.log(data)
