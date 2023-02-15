@@ -233,21 +233,23 @@ Project planning guide. [^1]
 
 #### Sprint 2 (Est completion 2/13/23):
 ##### Backend - M
-- [ ] Review mongoose-express-auth-API-boilerplate documentation - M [^4]
-- [ ] Follow boilerplate installation instructions - J/M/E
-- [ ] Install other dependencies as needed - All
+- [x] Review mongoose-express-auth-API-boilerplate documentation - M [^4]
+- [x] Follow boilerplate installation instructions - J/M/E
+- [x] Install other dependencies as needed - All
 - [x] Research AWS-S3 set-up guide - M [^3]
-- [ ] Research multer middleware package - E [^10]
-- [ ] Create models & subdocuments 
+- [x] Research multer middleware package - E [^10]
+- [x] Create models & subdocuments 
 - [ ] Seed database and/or incoporate API
-- [ ] Build Create, Index & Show Routes & test in Postman
+- [x] Build Create, Index & Show Routes & test in Postman
+- [x] Modify create route to connect to AWS
 ##### Frontend - J
-- [ ] Review react-auth-boilerplate documentation - J [^5]
-- [ ] Follow boilerplate installation instructions - J/M/E
-- [ ] Install other dependencies as needed - All
+- [x] Review react-auth-boilerplate documentation - J [^5]
+- [x] Follow boilerplate installation instructions - J/M/E
+- [x] Install other dependencies as needed - All
 
-#### Sprint 3 (Est completion 2/14/23):
+#### Sprint 3 (Est completion 2/15/23):
 ##### Backend - M
+- [ ] AWS Update & Delete route updates
 - [ ] Complete file RESTful routes & test in Postman 
 - [ ] Confirm back-end development working without unnecessary bugs
 ##### Frontend - J

@@ -6,12 +6,23 @@ const fileSchema = new mongoose.Schema({
         type: String,
         required: true
     }, 
+    name: {
+        type: String,
+        required: true
+    },
+    type: {
+        type: String,
+        required: true
+    },
     owner: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'
 	},
     description: {
         type: String
+    },
+    awsKey: {
+        type: String,
     },
     contributors: [contributorSchema]
 }, {

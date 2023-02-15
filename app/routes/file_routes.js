@@ -8,6 +8,7 @@ const multerS3 = require('multer-s3')
 // const storage = multer.memoryStorage()
 // const aws = require('aws-sdk')
 const aws = require('@aws-sdk/client-s3')
+const { DeleteObjectCommand } = require('@aws-sdk/client-s3')
 // const upload = multer({ storage: storage })
 // aws.config.update({ accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, region: process.env.AWS_REGION, })
 
@@ -23,7 +24,7 @@ const upload = multer({
         bucket: 'hoistm-cloud-system',
         key: function (req, file, cb) {
             console.log('file', file)
-            cb(null, file.originalname); //use Date.now() for unique file keys
+            cb(null, file.originalname + '_' + Date.now())
         }
     })
 })
@@ -60,6 +61,7 @@ const router = express.Router()
 router.get('/files', requireToken, (req, res, next) => {
 	File.find()
 		.populate('contributors.userRef')
+        .populate('owner')
 		.then((files) => {
 			// `files` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
@@ -77,6 +79,8 @@ router.get('/files', requireToken, (req, res, next) => {
 router.get('/files/:id', requireToken, (req, res, next) => {
 	// req.params.id will be set based on the `:id` in the route
 	File.findById(req.params.id)
+        .populate('contributors.userRef')
+        .populate('owner')
 		.then(handle404)
 		// if `findById` is succesful, respond with 200 and "file" JSON
 		.then((file) => res.status(200).json({ file: file.toObject() }))
@@ -125,20 +129,20 @@ router.get('/files/:id', requireToken, (req, res, next) => {
 //     } 
 // })'
 
-router.post('/files', upload.single('file'), (req, res, next) => {
-    let body
-    // res.send({
-	// 		message: "Uploaded!",
-	// 		url: function(file) {
-    //             body = {url: file.location, name: file.key, type: file.mimetype, size: file.size}
-	// 			return body
-	// 		}
-	// 	})
-    console.log('body', req.body)
-    console.log('file', req.file)
+router.post('/files', upload.single('file'), requireToken, (req, res, next) => {
+    // upload.single() uploads the file to AWS and returns a file object (req.file)
+    // console.log('body', req.body)
+    console.log('file', req.file)   
     req.body.url = req.file.location
-    console.log('body', req.body)
-    req.body.owner = req.userId
+    // console.log('body', req.body)
+    req.body.owner = req.user._id
+    // name field could be key or original name from req.file
+    req.body.name = req.file.originalname
+    // File type
+    req.body.type = req.file.mimetype
+    // console.log('body', req.body)
+    // console.log('userId', req.user._id)
+    req.body.awsKey = req.file.key
     File.create(req.body)
         .then(file => {
             res.status(201).json({ file: file.toObject() })
@@ -172,15 +176,24 @@ router.patch('/files/:id', requireToken, removeBlanks, (req, res, next) => {
 
 // DESTROY
 // DELETE /files/5a7db6c74d55bc51bdf39793
-router.delete('/files/:id', requireToken, (req, res, next) => {
+router.delete('/files/:id', requireToken, async (req, res, next) => {
 	File.findById(req.params.id)
 		.then(handle404)
-		.then((file) => {
-			// throw an error if current user doesn't own `file`
-			requireOwnership(req, file)
+		.then(async file => {
+            console.log(file.awsKey)
+            console.log(process.env.AWS_S3_BUCKET_NAME)
+            await s3.send(new DeleteObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}, (err, data) => {
+                console.error(err)
+                console.log(data)
+            }))
+            return file
+		})
+        .then(file => {
+            // throw an error if current user doesn't own `file`
+			// requireOwnership(req, file)
 			// delete the file ONLY IF the above didn't throw
 			file.deleteOne()
-		})
+        })
 		// send back 204 and no content if the deletion succeeded
 		.then(() => res.sendStatus(204))
 		// if an error occurs, pass it to the handler
