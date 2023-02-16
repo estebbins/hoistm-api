@@ -9,6 +9,8 @@ const multerS3 = require('multer-s3')
 // const aws = require('aws-sdk')
 const aws = require('@aws-sdk/client-s3')
 const { DeleteObjectCommand } = require('@aws-sdk/client-s3')
+const { GetObjectCommand } = require('@aws-sdk/client-s3')
+
 // const upload = multer({ storage: storage })
 // aws.config.update({ accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, region: process.env.AWS_REGION, })
 
@@ -46,6 +48,7 @@ const requireOwnership = customErrors.requireOwnership
 // this is middleware that will remove blank fields from `req.body`, e.g.
 // { file: { title: '', text: 'foo' } } -> { file: { text: 'foo' } }
 const removeBlanks = require('../../lib/remove_blank_fields')
+const { GetObjectCommand } = require('@aws-sdk/client-s3')
 // passing this as a second argument to `router.<verb>` will make it
 // so that a token MUST be passed for that route to be available
 // it will also set `req.user`
@@ -197,6 +200,26 @@ router.delete('/files/:id', requireToken, async (req, res, next) => {
         })
 		// send back 204 and no content if the deletion succeeded
 		.then(() => res.sendStatus(204))
+		// if an error occurs, pass it to the handler
+		.catch(next)
+})
+
+// Download
+// GET /files/5a7db6c74d55bc51bdf39793
+router.get('/files/download/:id', requireToken, async (req, res, next) => {
+	File.findById(req.params.id)
+		.then(handle404)
+		.then(async file => {
+            console.log(file.awsKey)
+            console.log(process.env.AWS_S3_BUCKET_NAME)
+            await s3.send(new GetObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}, (err, data) => {
+                console.error(err)
+                console.log(data)
+            }))
+            return file
+		})
+		// send back 204 and no content if the deletion succeeded
+		.then(() => res.sendStatus(200))
 		// if an error occurs, pass it to the handler
 		.catch(next)
 })
