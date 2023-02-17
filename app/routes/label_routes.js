@@ -32,7 +32,8 @@ const router = express.Router()
 // GET
 router.get('/filelabels/:fileId', requireToken, (req, res, next) => {
     const fileId = req.params.fileId
-    Label.find({fileRef: {$elemMatch: {_id: fileId}}})
+    // Label.find({fileRef: {$elemMatch: {_id: fileId}}})
+    Label.find({fileRef:fileId})
         .populate('owner')
         .populate('fileRef')
 		.then((labels) => {
@@ -52,6 +53,7 @@ router.get('/filelabels/:fileId', requireToken, (req, res, next) => {
 router.get('/labels', requireToken, (req, res, next) => {
     Label.find()
         .populate('owner')
+        .populate('fileRef')
 		.then((labels) => {
 			// `labels` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
