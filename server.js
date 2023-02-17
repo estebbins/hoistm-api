@@ -59,9 +59,9 @@ app.use(auth)
 // add `express.json` middleware which will parse JSON requests into
 // JS objects before they reach the route files.
 // The method `.use` sets up middleware for the Express application
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 // this parses requests sent by `$.ajax`, which use a different content type
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 
 // log each request as it comes in for debugging
 app.use(requestLogger)
