@@ -48,7 +48,7 @@ const requireOwnership = customErrors.requireOwnership
 // this is middleware that will remove blank fields from `req.body`, e.g.
 // { file: { title: '', text: 'foo' } } -> { file: { text: 'foo' } }
 const removeBlanks = require('../../lib/remove_blank_fields')
-const { GetObjectCommand } = require('@aws-sdk/client-s3')
+
 // passing this as a second argument to `router.<verb>` will make it
 // so that a token MUST be passed for that route to be available
 // it will also set `req.user`
