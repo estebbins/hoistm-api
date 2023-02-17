@@ -29,6 +29,25 @@ const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
 // INDEX
+// GET
+router.get('/filelabels/:fileId', requireToken, (req, res, next) => {
+    const fileId = req.params.fileId
+    Label.find({fileRef: {$elemMatch: {_id: fileId}}})
+        .populate('owner')
+        .populate('fileRef')
+		.then((labels) => {
+			// `labels` will be an array of Mongoose documents
+			// we want to convert each one to a POJO, so we use `.map` to
+			// apply `.toObject` to each one
+			return labels.map((label) => label.toObject())
+		})
+		// respond with status 200 and JSON of the labels
+		.then((labels) => res.status(200).json({ labels: labels }))
+		// if an error occurs, pass it to the handler
+		.catch(next)
+})
+
+// INDEX
 // GET /labels
 router.get('/labels', requireToken, (req, res, next) => {
     Label.find()
@@ -81,9 +100,10 @@ router.post('/labels', requireToken, (req, res, next) => {
 router.patch('/labels/:labelId/:fileId', requireToken, removeBlanks, (req, res, next) => {
 	// if the client attempts to change the `owner` property by including a new
 	// owner, prevent that by deleting that key/value pair
-	delete req.body.label.owner
+	// delete req.body.label.owner
 
     const { labelId, fileId } = req.params
+    console.log('params', req.params)
 
 	Label.findById(labelId)
 		.then(handle404)
@@ -96,9 +116,10 @@ router.patch('/labels/:labelId/:fileId', requireToken, removeBlanks, (req, res, 
                     label.fileRef.push(file)
                     return label.save()
                 })
-                .then(file => {
-                    return label.updateOne(req.body.label)
-                })
+                // .then(file => {
+                //     res.status(201).json({ label: label.toObject() })
+                //     // return label.updateOne(req.body.label)
+                // })
                 // if that succeeded, return 204 and no JSON
                 .then(() => res.sendStatus(204))
                 .catch(next)
