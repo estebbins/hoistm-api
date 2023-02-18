@@ -134,6 +134,41 @@ router.patch('/labels/:labelId/:fileId', requireToken, removeBlanks, (req, res, 
 		.catch(next)
 })
 
+// UPDATE - REMOVE FILE
+// PATCH /labels/5a7db6c74d55bc51bdf39793/f3u459032u534u09t24u
+router.patch('/removeLabel/:labelId/:fileId', requireToken, removeBlanks, (req, res, next) => {
+	// if the client attempts to change the `owner` property by including a new
+	// owner, prevent that by deleting that key/value pair
+	// delete req.body.label.owner
+
+    const { labelId, fileId } = req.params
+
+	Label.findById(labelId)
+		.then(handle404)
+		.then((label) => {
+			// pass the `req` object and the Mongoose record to `requireOwnership`
+			// it will throw an error if the current user isn't the owner
+			requireOwnership(req, label)
+            File.findById(fileId)
+                .then(file => {
+                    let index = label.fileRef.indexOf(file._id)
+                    label.fileRef.splice(index, 1)
+                    return label.save()
+                })
+                // .then(file => {
+                //     res.status(201).json({ label: label.toObject() })
+                //     // return label.updateOne(req.body.label)
+                // })
+                // if that succeeded, return 204 and no JSON
+                .then(() => res.sendStatus(204))
+                .catch(next)
+			// pass the result of Mongoose's `.update` to the next `.then`
+		})
+		// if an error occurs, pass it to the handler
+		.catch(next)
+})
+
+
 // UPDATE
 // PATCH /labels/5a7db6c74d55bc51bdf39793
 router.patch('/labels/:id', requireToken, removeBlanks, (req, res, next) => {
