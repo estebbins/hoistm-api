@@ -65,6 +65,7 @@ router.get('/files', requireToken, (req, res, next) => {
 	File.find()
 		.populate('contributors.userRef')
         .populate('owner')
+        .then(handle404)
 		.then((files) => {
 			// `files` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
@@ -147,6 +148,7 @@ router.post('/files', upload.single('file'), requireToken, (req, res, next) => {
     // console.log('userId', req.user._id)
     req.body.awsKey = req.file.key
     File.create(req.body)
+        .then(handle404)
         .then(file => {
             res.status(201).json({ file: file.toObject() })
         })

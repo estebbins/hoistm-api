@@ -33,9 +33,10 @@ const router = express.Router()
 router.get('/filelabels/:fileId', requireToken, (req, res, next) => {
     const fileId = req.params.fileId
     // Label.find({fileRef: {$elemMatch: {_id: fileId}}})
-    Label.find({fileRef:fileId})
+    Label.find({ fileRef: fileId })
         .populate('owner')
         .populate('fileRef')
+        .then(handle404)
 		.then((labels) => {
 			// `labels` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
@@ -54,6 +55,7 @@ router.get('/labels', requireToken, (req, res, next) => {
     Label.find()
         .populate('owner')
         .populate('fileRef')
+        .then(handle404)
 		.then((labels) => {
 			// `labels` will be an array of Mongoose documents
 			// we want to convert each one to a POJO, so we use `.map` to
@@ -73,7 +75,7 @@ router.get('/labels/:id', requireToken, (req, res, next) => {
     Label.findById(req.params.id)
         .populate('fileRef')
         .populate('owner')
-		.then(handle404)
+        .then(handle404)
 		// if `findById` is succesful, respond with 200 and "label" JSON
 		.then((label) => res.status(200).json({ label: label.toObject() }))
 		// if an error occurs, pass it to the handler
@@ -87,6 +89,7 @@ router.post('/labels', requireToken, (req, res, next) => {
 	req.body.label.owner = req.user.id
 
 	Label.create(req.body.label)
+        .then(handle404)
 		// respond to succesful `create` with status 201 and JSON of new "label"
 		.then((label) => {
 			res.status(201).json({ label: label.toObject() })
