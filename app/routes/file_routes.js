@@ -92,47 +92,6 @@ router.get('/files/:id', requireToken, (req, res, next) => {
 		.catch(next)
 })
 
-// CREATE
-// POST /files
-// router.post('/files', requireToken, upload.single('file'), async (req, res, next) => {
-// 	// set owner of new file to be current user
-// 	req.body.file.owner = req.user.id
-//     console.log('req.body.file', req.body.file)
-//     console.log('req.file', req.file)
-//     await s3Upload(req.file)
-//         .then(s3File => {
-//             return File.create({
-//             url: s3File.Location
-//             })
-//         })
-// 		// respond to succesful `create` with status 201 and JSON of new "file"
-// 		.then(file => {
-// 			res.status(201).json({ file: file.toObject() })
-// 		})
-// 		// if an error occurs, pass it off to our error handler
-// 		// the error handler needs the error message and the `res` object so that it
-// 		// can send an error message back to the client
-// 		.catch(next)
-// })
-
-// router.post('/files', upload.single('file'), async (req, res) => { 
-//     try { 
-//         console.log('params', req.params)
-//         console.log('req.body', req.body)
-//         console.log('req.body.file', req.body.file)
-//         console.log('req.file', req.file)
-//         console.log('req.file.path', req.file.path)
-//         const fileUrl = await s3Upload(req.file.path, req.file.originalname) 
-//         res.json({ url: fileUrl }) 
-//     } 
-//     catch (err) { 
-//         console.log('req.body.file', req.body.file)
-//         console.log('req.file', req.file)
-//         console.error(err) 
-//         res.status(500).json({ error: 'Failed to upload file' }) 
-//     } 
-// })'
-
 router.post('/files', upload.single('file'), requireToken, (req, res, next) => {
     // upload.single() uploads the file to AWS and returns a file object (req.file)
     // console.log('body', req.body)
@@ -208,22 +167,39 @@ router.delete('/files/:id', requireToken, async (req, res, next) => {
 
 // Download
 // GET /files/5a7db6c74d55bc51bdf39793
-router.get('/files/download/:id', requireToken, async (req, res, next) => {
+// !Add requireToken back in
+router.get('/files/download/:id', async (req, res, next) => {
 	File.findById(req.params.id)
 		.then(handle404)
 		.then(async file => {
-            console.log(file.awsKey)
-            console.log(process.env.AWS_S3_BUCKET_NAME)
-            await s3.send(new GetObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}, (err, data) => {
-                console.error(err)
-                console.log(data)
-            }))
-            return file
+            const data = await s3.send(new GetObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}))
+            const { Body } = await s3.send(new GetObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}))
+            // await data.Body.transformToString()
+
+            // res.set('Content-Type', data.ContentType); 
+            // res.set('Content-Disposition', `attachment; filename="${data.Metadata.originalname}"`)
+            // console.log(data.Body)
+            res.writeHead(200, {
+                'Content-Type': data.ContentType
+            })
+            Body.pipe(res)
+            // res.send(data.Body)
+            // return data
+                
+            //     (err, data) => {
+            //     console.error(err)
+            //     console.log('data', data)
+            // }))
+            // console.log('this is the file', file)
+            // return file
 		})
 		// send back 204 and no content if the deletion succeeded
-		.then(() => res.sendStatus(200))
+		// .then(() => res.sendStatus(200))
 		// if an error occurs, pass it to the handler
 		.catch(next)
+
+        // Download the file from S3 const file = await s3.getObject(params).promise(); // Set the response headers for the file 
+; // Send the file to the client res.send(file.Body); } catch (error) { console.error(error); res.status(500).send('Error downloading file'); } });
 })
 
 module.exports = router
