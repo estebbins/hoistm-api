@@ -166,40 +166,23 @@ router.delete('/files/:id', requireToken, async (req, res, next) => {
 })
 
 // Download
-// GET /files/5a7db6c74d55bc51bdf39793
+// GET /files/download/5a7db6c74d55bc51bdf39793
 // !Add requireToken back in
+
+// source code for downloads: https://stackoverflow.com/questions/70534780/convert-weird-image-characters-for-use-in-image-src
+
 router.get('/files/download/:id', async (req, res, next) => {
 	File.findById(req.params.id)
 		.then(handle404)
 		.then(async file => {
             const data = await s3.send(new GetObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}))
             const { Body } = await s3.send(new GetObjectCommand({ Bucket: process.env.AWS_S3_BUCKET_NAME, Key: file.awsKey}))
-            // await data.Body.transformToString()
-
-            // res.set('Content-Type', data.ContentType); 
-            // res.set('Content-Disposition', `attachment; filename="${data.Metadata.originalname}"`)
-            // console.log(data.Body)
             res.writeHead(200, {
                 'Content-Type': data.ContentType
             })
             Body.pipe(res)
-            // res.send(data.Body)
-            // return data
-                
-            //     (err, data) => {
-            //     console.error(err)
-            //     console.log('data', data)
-            // }))
-            // console.log('this is the file', file)
-            // return file
 		})
-		// send back 204 and no content if the deletion succeeded
-		// .then(() => res.sendStatus(200))
-		// if an error occurs, pass it to the handler
 		.catch(next)
-
-        // Download the file from S3 const file = await s3.getObject(params).promise(); // Set the response headers for the file 
-; // Send the file to the client res.send(file.Body); } catch (error) { console.error(error); res.status(500).send('Error downloading file'); } });
 })
 
 module.exports = router
