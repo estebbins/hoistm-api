@@ -49,6 +49,17 @@ This app allows users to upload files into a virtual file system where the user 
 ## Entity Relationship Diagram
 ![Hoist_erd](images_readme/hoistm-erd.jpeg)
 
+## Unsolved problems/Next Version Notes
+- The token field should be disabled for contributors
+- AWS capacity/file size might need to be updated - 
+- File size above 120MB may cause crash of app - can resolve through AWS
+- AWS Bucket Capacity is 5GB
+- Bucket configuration steps need to be added to READMe
+- Curl scripts to be updated
+
+## Installation instructions
+Developers - once repo forked/cloned, run npm install to install dependencies, will need AWS Secrets (.env file) from original developers
+
 #### Route Tables
 
 ##### Files

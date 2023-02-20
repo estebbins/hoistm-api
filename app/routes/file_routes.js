@@ -23,7 +23,7 @@ const upload = multer({
 		acl: 'public-read',
         bucket: 'hoistm-cloud-system',
         key: function (req, file, cb) {
-            console.log('file', file)
+            // console.log('file', file)
             cb(null, file.originalname + '_' + Date.now())
         }
     })
