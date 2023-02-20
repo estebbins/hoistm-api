@@ -47,7 +47,7 @@ This app allows users to upload files into a virtual file system where the user 
 ## Wireframes/Screenshots
 
 ## Entity Relationship Diagram
-![Hoist_erd](images_readme/hoistm_ERD.png)
+![Hoist_erd](images_readme/hoistm-erd.jpeg)
 
 #### Route Tables
 
