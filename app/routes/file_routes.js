@@ -62,7 +62,8 @@ const router = express.Router()
 // INDEX
 // GET /files
 router.get('/files', requireToken, (req, res, next) => {
-	File.find()
+	// console.log(req)
+	File.find({ owner: req.user._id })
 		.populate('contributors.userRef')
         .populate('owner')
         .then(handle404)
@@ -171,7 +172,7 @@ router.delete('/files/:id', requireToken, async (req, res, next) => {
 
 // source code for downloads: https://stackoverflow.com/questions/70534780/convert-weird-image-characters-for-use-in-image-src
 
-router.get('/files/download/:id', async (req, res, next) => {
+router.get('/files/download/:id', requireToken, async (req, res, next) => {
 	File.findById(req.params.id)
 		.then(handle404)
 		.then(async file => {
