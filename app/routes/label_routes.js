@@ -112,7 +112,9 @@ router.patch('/labels/:labelId/:fileId', requireToken, removeBlanks, (req, res, 
 			// pass the `req` object and the Mongoose record to `requireOwnership`
 			// it will throw an error if the current user isn't the owner
 			requireOwnership(req, label)
-            if (!label.fileRef.includes(fileId)) {
+			// check to make sure that the label's fileRef array doesn't already include the file we're going to add
+			if (!label.fileRef.includes(fileId)) {
+			// if it doesn't, find the file by its id
             File.findById(fileId)
 				.then(file => {
 					// push the file onto the label's fileRef array
