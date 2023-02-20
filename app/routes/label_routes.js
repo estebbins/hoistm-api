@@ -112,8 +112,7 @@ router.patch('/labels/:labelId/:fileId', requireToken, removeBlanks, (req, res, 
 			// pass the `req` object and the Mongoose record to `requireOwnership`
 			// it will throw an error if the current user isn't the owner
 			requireOwnership(req, label)
-
-			// find the file by its id
+            if (!label.fileRef.includes(fileId)) {
             File.findById(fileId)
 				.then(file => {
 					// push the file onto the label's fileRef array
@@ -123,8 +122,9 @@ router.patch('/labels/:labelId/:fileId', requireToken, removeBlanks, (req, res, 
                 // if that succeeded, return 204 and no JSON
                 .then(() => res.sendStatus(204))
                 .catch(next)
-			// pass the result of Mongoose's `.update` to the next `.then`
+            }
 		})
+        .then(() => res.sendStatus(204))
 		// if an error occurs, pass it to the handler
 		.catch(next)
 })
