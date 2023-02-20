@@ -88,7 +88,7 @@ router.patch('/contributors/:fileId/:contributorId', requireToken, removeBlanks,
 
             return file.save()
         })
-        // send a status
+        // send a statu
         .then(() => res.sendStatus(204))
         .catch(next)
 })

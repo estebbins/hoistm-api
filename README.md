@@ -28,7 +28,7 @@ This app allows users to upload files into a virtual file system where the user 
 - As a signed in user, I would like to change password.
 - As a signed in user, I would like to sign out.
 - As a signed in user, I would like to upload a file to AWS with a name.
-- As a signed in user, I would like to update the name of my file on AWS.
+- As a signed in user, I would like to update the name of my file on AWS and add/edit its description.
 - As a signed in user, I would like to see the all my uploaded files on AWS.
 - As a signed in user, I would like to see the preview of all files on AWS.
 - As a signed in user, I would like to delete the reference of my file from the database.
@@ -37,9 +37,12 @@ This app allows users to upload files into a virtual file system where the user 
     - date modified
     - owner (user who uploaded the file)
     - name
+    - description
+    - contributors attached
+    - labels associated
 - As a signed in user, I would like to be able to create and associate custom labels to files
-- As a signed in user, I would like to search my files based on data above & custom filters
 - As a signed in user, I would like to download files from AWS
+- As a signed in user, I would like to filter my files based on custom labels
 
 ## Wireframes/Screenshots
 
@@ -47,72 +50,78 @@ This app allows users to upload files into a virtual file system where the user 
 ![Hoist_erd](images_readme/hoistm_ERD.png)
 
 #### Route Tables
+
 ##### Files
-| **URL**              | **HTTP Verb** |**Actions**|
-|----------------------|---------------|-----------|
-| /files/mine         | GET           | index
+| **URL**             | **HTTP Verb** |**Actions**|
+|---------------------|---------------|-----------|
+| /files              | GET           | index
 | /files/:id          | GET           | show
-| /files/new          | GET           | new
-| /files/new          | POST          | create
-| /files/:id/edit     | GET           | edit        |
-| /files/:id          | PATCH/PUT     | update      |
-| /files/:id          | DELETE        | destroy     |
+| /files/             | POST          | create/upload
+| /files/:id          | PATCH         | update      
+| /files/:id          | DELETE        | destroy     
+| /files/download/:id | GET           | download     
 
 ##### Authentication: Users
-
 | **URL**              | **HTTP Verb** |**Actions**|**Controller#Action**|
 |----------------------|---------------|-----------|---------------------|
 | /auth/signup         | POST          | new       | users#signup
 | /auth/login          | POST          | create    | users#login
-| /auth/logout         | DELETE        | destroy   | users#logout        |
+| /auth/logout         | DELETE        | destroy   | users#logout        
 
-#### Route Tables
-##### Files
-| **URL**              | **HTTP Verb** |**Actions**|
-|----------------------|---------------|-----------|
-| /files/mine         | GET           | index
-| /files/:id          | GET           | show
-| /files/new          | GET           | new
-| /files/new          | POST          | create
-| /files/:id/edit     | GET           | edit        |
-| /files/:id          | PATCH/PUT     | update      |
-| /files/:id          | DELETE        | destroy     |
+##### Labels
+| **URL**                  | **HTTP Verb** |**Actions**|
+|--------------------------|---------------|-----------|
+| /filelabels/:fileId      | GET           | index/filter
+| /labels                  | GET           | index
+| /labels/:id              | GET           | show
+| /labels                  | POST          | create
+| /labels/:lableIid/:fileId| PATCH         | update/add file      
+| /labels/:labelId/:fileId | PATCH         | update/remove file     
+| /labels/:id              | PATCH         | update    
+| /labels/:id              | DELETE        | destroy     
+
+##### Contributors
+| **URL**                              | **HTTP Verb** |**Actions**|
+|--------------------------------------|---------------|-----------|
+| /contributors/:filter                | GET           | index/filter
+| /contributors/:fileId                | POST          | create/add to file
+| /contributors/:fileId/:contributorId | PATCH         | update  
+| /contributors/:fileId/:contributorId | DELETE        | destroy  
 
 ### Models
 #### File Model [^9]
 ```javascript
-const mongoose = require('mongoose')
-const contributorSchema = require('./contributor')
-
 const fileSchema = new mongoose.Schema({
     url: {
         type: String,
         required: true
     }, 
+    name: {
+        type: String,
+        required: true
+    },
+    type: {
+        type: String,
+        required: true
+    },
     owner: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'
 	},
-    labels: {
-        type: [String],
-    },
     description: {
         type: String
     },
+    awsKey: {
+        type: String,
+    },
     contributors: [contributorSchema]
 }, {
-  timestamps: true
+    timestamps: true
 })
-
-module.exports = mongoose.model('File', fileSchema)
 ```
-```javascript
 
-```
 #### Contributors subdocument
 ```javascript
-const mongoose = require('mongoose')
-
 const contributorSchema = new mongoose.Schema({
   userRef: {
     type: mongoose.Schema.Types.ObjectId,
@@ -121,20 +130,17 @@ const contributorSchema = new mongoose.Schema({
   }, 
   permissionLevel: {
     type: String,
-    enum: ['read only', 'read and write']
-    default: ['read only']
+    enum: ['read only', 'read and write'],
+    default: 'read only',
+    required: true
   }
 }, {
   timestamps: true
 })
-
-module.exports = contributorSchema
 ```
 
 #### User Model [^9]
 ```javascript
-const mongoose = require('mongoose')
-
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -156,63 +162,60 @@ const userSchema = new mongoose.Schema({
     }
   }
 })
-
-module.exports = mongoose.model('User', userSchema)
 ```
-#### File route (example) [^9]
+
+#### Label Model [^9]
 ```javascript
-const express = require('express')
-const multer = require('multer')
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
-// const customErrors = require('../../lib/custom_errors')
-// const handle404 = customErrors.handle404
-// const removeBlanks = require('../../lib/remove_blank_fields')
-const File = require('../models/file')
-const router = express.Router()
-const s3Upload = require('../../lib/s3_upload')
+const labelSchema = new mongoose.Schema({
 
-router.post('/files', upload.single('file'), (req, res, next) => {
-  console.log(req.body.file, req.file)
-  s3Upload(req.file)
-    .then(s3File => {
-      return File.create({
-        url: s3File.Location
-      })
-    })
-    .then(file => {
-      console.log(file)
-      res.status(201).json({ file })
-    })
-    .catch(next)
-})
+    owner: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
 
-module.exports = router
+	},
+    fileRef: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'File'
+    }],
+    name: {
+        type: String, 
+        required: true
+    },
+    color: {
+        type: String, 
+        required: true
+    },
+},
+{
+  timestamps: true
+}
+)
 ```
+
 Example client code [^11]
 
 ## Project Requirements
 Project 3 overview. [^2]
 Project planning guide. [^1]
 ### MVP
-- [ ] A working app, built by the whole team, hosted somewhere on the internet
+- [x] A working app, built by the whole team, hosted somewhere on the internet
     - Git Manager: Emily Stebbins - https://github.com/estebbins 
     - Frontend Manager: Jordan Rector - https://github.com/rectorjordan94 
     - Backend Manager: Malcolm Kemp - https://github.com/Malokingsley 
-- [ ] A link to your hosted working app in the URL section in each of your Github repos
-- [ ]TWO Github repos:
+- [x] A link to your hosted working app in the URL section in each of your Github repos
+- [x]TWO Github repos:
     - one for the API - https://github.com/estebbins/hoistm-api
     - one for the client - https://github.com/estebbins/hoistm-client
     - A team git repository hosted on Github, with a link to your hosted project, and frequent commits from every team member dating back to the very beginning of the project.
-- [ ] A readme.md file with:
-    - [ ]Include a screenshot of the site in repo's README
-    - [ ]Explanations of the technologies used
-    - [ ]A couple paragraphs about the general approach you took
-    - [ ]Installation instructions for any dependencies
-    - [ ]Your user stories – who are your users, what do they want, and why?
-    - [ ]Your wireframes – sketches of major views / interfaces in your application - EMBEDDED IN YOUR README
-    - [ ]Your ERDS - Entity Relationship Diagrams - EMBEDDED IN YOUR README
-    - [ ]Descriptions of any unsolved problems or major hurdles your team had to overcome
+- [x] A readme.md file with:
+    - [x]Include a screenshot of the site in repo's README
+    - [x]Explanations of the technologies used
+    - [x]A couple paragraphs about the general approach you took
+    - [x]Installation instructions for any dependencies
+    - [x]Your user stories – who are your users, what do they want, and why?
+    - [x]Your wireframes – sketches of major views / interfaces in your application - EMBEDDED IN YOUR README
+    - [x]Your ERDS - Entity Relationship Diagrams - EMBEDDED IN YOUR README
+    - [x]Descriptions of any unsolved problems or major hurdles your team had to overcome
 
 #### Technical Requirements
 - Build a full-stack application by making your own back-end API and your own front-end client
@@ -239,7 +242,7 @@ Project planning guide. [^1]
 - [x] Research AWS-S3 set-up guide - M [^3]
 - [x] Research multer middleware package - E [^10]
 - [x] Create models & subdocuments 
-- [ ] Seed database and/or incoporate API
+- [x] Seed database and/or incoporate API
 - [x] Build Create, Index & Show Routes & test in Postman
 - [x] Modify create route to connect to AWS
 ##### Frontend - J
@@ -249,33 +252,33 @@ Project planning guide. [^1]
 
 #### Sprint 3 (Est completion 2/15/23):
 ##### Backend - M
-- [ ] AWS Update & Delete route updates
-- [ ] Complete file RESTful routes & test in Postman 
-- [ ] Confirm back-end development working without unnecessary bugs
+- [x] AWS Update & Delete route updates
+- [x] Complete file RESTful routes & test in Postman 
+- [x] Confirm back-end development working without unnecessary bugs
 ##### Frontend - J
-- [ ] FileIndex component
-- [ ] ShowFile component
-- [ ] CreateFile component
-- [ ] EditFile component
+- [x] FileIndex component
+- [x] ShowFile component
+- [x] CreateFile component
+- [x] EditFile component
 
 #### Sprint 4 (Est completion 2/15/23):
 ##### Frontend - J
-- [ ] Build label component
-- [ ] Filters component
-- [ ] Enhance styling of pages, get feedback 
-- [ ] Update responses & error handling
-- [ ] Conduct extensive testing & ensure DB connection intact
-- [ ] Evaluate readiness for deployment
-- [ ] Merge development branch(s) as needed with main
+- [x] Build label component
+- [x] Filters component
+- [x] Enhance styling of pages, get feedback 
+- [x] Update responses & error handling
+- [x] Conduct extensive testing & ensure DB connection intact
+- [x] Evaluate readiness for deployment
+- [x] Merge development branch(s) as needed with main
 
 ##### Sprint 5 (Est completion 2/16/23):
-- [ ] Deploy application
-- [ ] Conduct extensive testing
-- [ ] Conduct user acceptance testing
-- [ ] Address bugs, errors, feedback
-- [ ] Update README.md with all necessary requirements & information
-- [ ] Confirm all technical requirements & MVP completion
-- [ ] Submit project 2 per submission instructions
+- [x] Deploy application
+- [x] Conduct extensive testing
+- [x] Conduct user acceptance testing
+- [x] Address bugs, errors, feedback
+- [x] Update README.md with all necessary requirements & information
+- [x] Confirm all technical requirements & MVP completion
+- [x] Submit project 2 per submission instructions
 
 #### Final Deliverable (Est completion 2/21/23):
 - [ ] Present deliverable to SEI Cohort & Instructors
