@@ -52,7 +52,7 @@ router.get('/filelabels/:fileId', requireToken, (req, res, next) => {
 // INDEX
 // GET /labels
 router.get('/labels', requireToken, (req, res, next) => {
-    Label.find()
+    Label.find({ owner: req.user._id})
         .populate('owner')
         .populate('fileRef')
         .then(handle404)
