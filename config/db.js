@@ -1,3 +1,5 @@
+require("dotenv").config()
+
 'use strict'
 
 // creating a base name for the mongodb
